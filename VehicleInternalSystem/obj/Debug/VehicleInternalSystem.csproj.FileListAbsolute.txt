@@ -1,0 +1,11 @@
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.exe.config
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.exe
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.pdb
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.csprojResolveAssemblyReference.cache
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.ECUForm.resources
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.Properties.Resources.resources
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.csproj.GenerateResource.Cache
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.exe
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.pdb
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.BCUForm.resources
+C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.TCUForm.resources
