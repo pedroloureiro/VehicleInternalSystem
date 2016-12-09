@@ -90,6 +90,10 @@ namespace VehicleInternalSystem
             //sends every combination to all requested connection
             //[TODO]
             string ecuID = "ID? ECU";
+            string testtime = addTimestamp(ecuID);
+            Console.WriteLine(testtime);
+            string testtime2 = addTimestamp(ecuID);
+            Console.WriteLine(testtime2);
             string sendBCU = EncryptMessage("BCU", ecuID);//test
             //Console.WriteLine("sendBCU");
             //Console.WriteLine(sendBCU);
@@ -197,6 +201,48 @@ namespace VehicleInternalSystem
             }
 
             return response.Equals("OK");
+        }
+
+        public static String GetTimestamp(DateTime value)
+        {
+            Console.WriteLine("get time stamp");
+            Console.WriteLine(value.ToString("yyyyMMddHHmmssffff"));
+            return value.ToString("yyyyMMddHHmmssffff");
+        }
+
+        //add timestamp on the begi of the message before encripting
+        public string addTimestamp(string a) {
+            //add timestamp
+            //return a
+            Console.WriteLine("add time stamp");
+            Console.WriteLine(a);
+            a = GetTimestamp(DateTime.Now)+"_" + a;
+            Console.WriteLine(a);
+            return a;
+        }
+
+        //remove timestamp from the message and validates the timestamp, 
+        //if timestamp is valid return true, if not returns false
+        public string removeTimestamp(string a)
+        {
+            //c=split(a,_)[0];
+            //string b = split(a,_)[1];
+            //timenow
+            //dif=timenow-c
+            //case BCU/ECU
+            //if (a<BcuValidTime) {return true}
+            //case TCU
+            //if (a<tcuValidTime) {return true}
+            //else return false
+            return a;
+        }
+
+        //verify if timestamp is valid return true, if not returns false
+        public string validateTimestamp(string a)
+        {
+            
+
+            return a;
         }
 
         public string EncryptMessage(string type, string message)
