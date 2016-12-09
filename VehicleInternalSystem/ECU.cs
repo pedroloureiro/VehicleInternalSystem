@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -38,6 +39,11 @@ namespace VehicleInternalSystem
         private static RSAParameters tcu_ecuPub;
         //public key to decrypt messages from tcu
         private static RSAParameters tcuPubKey;
+
+        //timestamps for validation if BCU message freshness 1s
+        private static int BcuValidTime = 10000;
+        //timestamps for validation if TCUmessage freshness 6s
+        private static int TcuValidTime = 60000;
 
         public ECU(RSAParameters _bcu_ecuPriv, RSAParameters _tcu_ecuPriv, RSAParameters _bcuPubKey, RSAParameters _tcuPubKey)
         {
@@ -90,10 +96,18 @@ namespace VehicleInternalSystem
             //sends every combination to all requested connection
             //[TODO]
             string ecuID = "ID? ECU";
-            string testtime = addTimestamp(ecuID);
+            /*string testtime = addTimestamp(ecuID);
             Console.WriteLine(testtime);
+            string stupid = removeTimestamp(testtime, "BCU");
+            Console.WriteLine("stupid");
+            Console.WriteLine(stupid);
             string testtime2 = addTimestamp(ecuID);
             Console.WriteLine(testtime2);
+            Thread.Sleep(6000);
+            string stupid2 = removeTimestamp(testtime2, "TCU");
+            if (stupid2 == null) { Console.WriteLine("snuulllllllllll2"); }
+            Console.WriteLine("stupid22");
+            Console.WriteLine(stupid2);*/
             string sendBCU = EncryptMessage("BCU", ecuID);//test
             //Console.WriteLine("sendBCU");
             //Console.WriteLine(sendBCU);
@@ -214,35 +228,42 @@ namespace VehicleInternalSystem
         public string addTimestamp(string a) {
             //add timestamp
             //return a
+            //DateTime date1 = new DateTime(DateTime.Now);
             Console.WriteLine("add time stamp");
             Console.WriteLine(a);
-            a = GetTimestamp(DateTime.Now)+"_" + a;
+            a = GetTimestamp(DateTime.Now)+"-" + a;
             Console.WriteLine(a);
             return a;
         }
 
         //remove timestamp from the message and validates the timestamp, 
-        //if timestamp is valid return true, if not returns false
-        public string removeTimestamp(string a)
+        //if timestamp is valid return  message without timestamp, if not returns null
+        public string removeTimestamp(string decriptedmessage, string type)
         {
-            //c=split(a,_)[0];
-            //string b = split(a,_)[1];
-            //timenow
-            //dif=timenow-c
-            //case BCU/ECU
-            //if (a<BcuValidTime) {return true}
-            //case TCU
-            //if (a<tcuValidTime) {return true}
-            //else return false
-            return a;
-        }
-
-        //verify if timestamp is valid return true, if not returns false
-        public string validateTimestamp(string a)
-        {
-            
-
-            return a;
+            string[] messageparts = decriptedmessage.Split('-');
+            Console.WriteLine("messageparts.Length");
+            Console.WriteLine(messageparts[0]);
+            Console.WriteLine(messageparts[1]);
+            long actualTime = long.Parse(GetTimestamp(DateTime.Now));
+            long messageTime = long.Parse(messageparts[0]);
+            long differenceTime = actualTime - messageTime;
+            Console.WriteLine(differenceTime);
+            Console.WriteLine(type);
+            switch (type)
+            {
+                case "BCU":
+                    Console.WriteLine("in bcu time");
+                    if (differenceTime < BcuValidTime) { return messageparts[1]; }
+                    break;
+                case "TCU":
+                    Console.WriteLine("in tcu time");
+                    Console.WriteLine(differenceTime);
+                    Console.WriteLine(TcuValidTime);
+                    Console.WriteLine("in tcu time");
+                    if (differenceTime < TcuValidTime) { return messageparts[1]; }
+                    break;
+            }
+            return null;
         }
 
         public string EncryptMessage(string type, string message)
