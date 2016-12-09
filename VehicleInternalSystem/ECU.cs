@@ -96,49 +96,61 @@ namespace VehicleInternalSystem
             //sends every combination to all requested connection
             //[TODO]
             string ecuID = "ID? ECU";
-            /*string testtime = addTimestamp(ecuID);
-            Console.WriteLine(testtime);
-            string stupid = removeTimestamp(testtime, "BCU");
-            Console.WriteLine("stupid");
-            Console.WriteLine(stupid);
-            string testtime2 = addTimestamp(ecuID);
-            Console.WriteLine(testtime2);
-            Thread.Sleep(6000);
-            string stupid2 = removeTimestamp(testtime2, "TCU");
-            if (stupid2 == null) { Console.WriteLine("snuulllllllllll2"); }
-            Console.WriteLine("stupid22");
-            Console.WriteLine(stupid2);*/
-            string sendBCU = EncryptMessage("BCU", ecuID);//test
-            //Console.WriteLine("sendBCU");
-            //Console.WriteLine(sendBCU);
-            //Console.WriteLine("__sendBCU");
+            string ecuIDtime = addTimestamp(ecuID);
+            //Console.WriteLine(testtime);
+            //string stupid = removeTimestamp(testtime, "BCU");
+            //Console.WriteLine("stupid");
+            //Console.WriteLine(stupid);
+            //string testtime2 = addTimestamp(ecuID);
+            //Console.WriteLine(testtime2);
+            //Thread.Sleep(6000);
+            //string stupid2 = removeTimestamp(testtime2, "TCU");
+            //if (stupid2 == null) { Console.WriteLine("snuulllllllllll2"); }
+            //Console.WriteLine("stupid22");
+            //Console.WriteLine(stupid2);
+            string sendBCU = EncryptMessage("BCU", ecuIDtime);//test
+            Console.WriteLine("sendBCU");
+            Console.WriteLine(sendBCU);
+            Console.WriteLine("__sendBCU");
             //Console.WriteLine(DecryptMessage("TCU", sendBCU));
-            string sendTCU = EncryptMessage("TCU", ecuID);
+            string sendTCU = EncryptMessage("TCU", ecuIDtime);
+            Console.WriteLine("sendTCU");
+            Console.WriteLine(sendTCU);
+            Console.WriteLine("__sendTCU");
             writer.Write(sendBCU); 
             writer.Write(sendTCU);//end[todo]
             string id = reader.ReadString();
-            //Console.WriteLine("id");
-            //Console.WriteLine(id);
+            Console.WriteLine("id");
+            Console.WriteLine(id);
             //[TODO] DecryptMessage(id)
             string BCU = "BCU";
             string TCU = "TCU";
-            string idBCU = DecryptMessage(BCU, id);
+            Console.WriteLine("pass here");
+            string idBCUtime = DecryptMessage(BCU, id);
+            string idBCU = removeTimestamp(idBCUtime, BCU);
             //Console.WriteLine("idbcu");
             //Console.WriteLine(idBCU);
-            string idTCU = DecryptMessage(TCU, id);
+            Console.WriteLine("pass here1");
+            string idTCUtime = DecryptMessage(TCU, id);
+            string idTCU = removeTimestamp(idTCUtime, TCU);
             //Console.WriteLine("idtcu");
             //Console.WriteLine(idTCU);
+            //type is BCU if speaking with BCU, and TCU for TCU
             string type = null;
             //BCU key decriptes well the message
             if (idBCU != null) {type = BCU;}
             //TCU key decriptes well the message
             if (idTCU != null) {type = TCU;}
-            //Console.WriteLine("type");
-            //Console.WriteLine(type);
-            //Console.WriteLine("before send");
-            writer.Write(EncryptMessage(type, "OK?"));
-            string bcuString = reader.ReadString();
-            string response = DecryptMessage(type, bcuString);
+            Console.WriteLine("type");
+            Console.WriteLine(type);
+            Console.WriteLine("after type");
+            writer.Write(EncryptMessage(type, addTimestamp("OK?")));
+            Console.WriteLine("pass here2");
+            string encriptedResponse = reader.ReadString();
+            Console.WriteLine("pass here3");
+            string responseTime = DecryptMessage(type, encriptedResponse);
+            Console.WriteLine("pass here4");
+            string response = removeTimestamp(responseTime, type);
             if (!response.Equals("OK"))
             {return (type + " tried to connect, but was denied\n");}//end[todo]
             switch (type)//changed id to type
@@ -217,49 +229,53 @@ namespace VehicleInternalSystem
             return response.Equals("OK");
         }
 
+        //returns a timestamp
         public static String GetTimestamp(DateTime value)
         {
-            Console.WriteLine("get time stamp");
-            Console.WriteLine(value.ToString("yyyyMMddHHmmssffff"));
+            //Console.WriteLine("get time stamp");
+            //Console.WriteLine(value.ToString("yyyyMMddHHmmssffff"));
             return value.ToString("yyyyMMddHHmmssffff");
         }
 
-        //add timestamp on the begi of the message before encripting
-        public string addTimestamp(string a) {
+        //add timestamp on the begin of the message before encripting
+        public string addTimestamp(string message) {
             //add timestamp
             //return a
             //DateTime date1 = new DateTime(DateTime.Now);
-            Console.WriteLine("add time stamp");
-            Console.WriteLine(a);
-            a = GetTimestamp(DateTime.Now)+"-" + a;
-            Console.WriteLine(a);
-            return a;
+            //Console.WriteLine("add time stamp");
+            //Console.WriteLine(message);
+            message = GetTimestamp(DateTime.Now)+"-" + message;
+            //Console.WriteLine(message);
+            return message;
         }
 
         //remove timestamp from the message and validates the timestamp, 
         //if timestamp is valid return  message without timestamp, if not returns null
         public string removeTimestamp(string decriptedmessage, string type)
         {
+            //decription was not sucessfull, because it's a wrong message
+            if (decriptedmessage == null)
+            { return null; }
             string[] messageparts = decriptedmessage.Split('-');
-            Console.WriteLine("messageparts.Length");
-            Console.WriteLine(messageparts[0]);
-            Console.WriteLine(messageparts[1]);
+            //Console.WriteLine("messageparts.Length");
+            //Console.WriteLine(messageparts[0]);
+            //Console.WriteLine(messageparts[1]);
             long actualTime = long.Parse(GetTimestamp(DateTime.Now));
             long messageTime = long.Parse(messageparts[0]);
             long differenceTime = actualTime - messageTime;
-            Console.WriteLine(differenceTime);
-            Console.WriteLine(type);
+            //.WriteLine(differenceTime);
+            //Console.WriteLine(type);
             switch (type)
             {
                 case "BCU":
-                    Console.WriteLine("in bcu time");
+                    //Console.WriteLine("in bcu time");
                     if (differenceTime < BcuValidTime) { return messageparts[1]; }
                     break;
                 case "TCU":
-                    Console.WriteLine("in tcu time");
-                    Console.WriteLine(differenceTime);
-                    Console.WriteLine(TcuValidTime);
-                    Console.WriteLine("in tcu time");
+                    //Console.WriteLine("in tcu time");
+                   // Console.WriteLine(differenceTime);
+                    //Console.WriteLine(TcuValidTime);
+                    //Console.WriteLine("in tcu time");
                     if (differenceTime < TcuValidTime) { return messageparts[1]; }
                     break;
             }
@@ -372,7 +388,7 @@ namespace VehicleInternalSystem
             //delete these 2 printlines
             //Console.WriteLine("LISTENresponse");
             //Console.WriteLine(response);
-            return DecryptMessage("TCU", response);
+            return removeTimestamp (DecryptMessage("TCU", response), "BCU");
         }
 
         public string BrakeCmd()
@@ -380,9 +396,9 @@ namespace VehicleInternalSystem
             string response;
             try
             {
-                bcuWriter.Write(EncryptMessage("BCU","BRAKE"));
+                bcuWriter.Write(EncryptMessage("BCU",addTimestamp("BRAKE")));
                 response = bcuReader.ReadString();
-                return DecryptMessage("BCU", response);
+                return removeTimestamp (DecryptMessage("BCU", response), "BCU");
             }
             catch (Exception)
             {

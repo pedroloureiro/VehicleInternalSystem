@@ -40,7 +40,8 @@ namespace VehicleInternalSystem
         {
             var thread0 = new Thread(GenerateKeys);
             thread0.Start();
-            Thread.Sleep(5000); //so thread0 executes and ends before others start 1 2 3  
+            thread0.Join();
+            //Thread.Sleep(5000); //so thread0 executes and ends before others start 1 2 3  
             var thread1 = new Thread(ThreadECU);
             var thread2 = new Thread(ThreadBCU);
             var thread3 = new Thread(ThreadTCU);
