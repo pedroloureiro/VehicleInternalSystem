@@ -66,13 +66,20 @@ namespace VehicleInternalSystem
             writer = new BinaryWriter(tcuSocket.GetStream());
             string response = reader.ReadString();//asks for id//[TODO]decript with bcuPrivateKey 
             response = DecryptMessage(response);
+            string response2 = reader.ReadString();//asks for id//[TODO]decript with bcuPrivateKey 
+            response2 = DecryptMessage(response2);
             //Console.WriteLine("RESPONSE");
             //Console.WriteLine(response);
-
+            //if the first message was not sucefull desencripted the second message was
+            if (response == null) { response = response2; }
+            //Console.WriteLine("RESPONSEafter filtrued bad arsponse");
+            //Console.WriteLine(response);
             if (response.Equals("ID? ECU"))//if it's bcu id 
             {
                 //encrypt the message
                 string encmessage = EncryptMessage("TCU");
+                //Console.WriteLine("EncryptMessage(TCU");
+                //Console.WriteLine(encmessage);
                 writer.Write(encmessage);//send i'm tcu//[TODO]encript with ecutPublicKey
             }
             else
@@ -152,10 +159,27 @@ namespace VehicleInternalSystem
             //we want to decrypt, therefore we need a csp and load our private key
             csp.ImportParameters(privateKey);
             //decrypt and strip pkcs#1.5 padding
-            bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
-            //get our original plainText back...
-            plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
+            try
+            {
+                //Console.WriteLine("--bytesPlainTextData");
+                //Console.WriteLine(bytesPlainTextData);
+                bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
+                //Console.WriteLine("bytesPlainTextData");
+                //Console.WriteLine(bytesPlainTextData);
+            }
+            //if the decripting is not successefull enters the exception 
+            catch (Exception)
+            {
+                //Console.WriteLine("null exception");
+                return null;
+            }
 
+            //get our original plainText back...
+            //Console.WriteLine("11111plainTextData");
+            //Console.WriteLine(plainTextData);
+            plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
+            //Console.WriteLine("2222plainTextData");
+            //Console.WriteLine(plainTextData);
             //Console.WriteLine("------BEGIN  TCUprivateKey");//to erase
             //Console.WriteLine(privateKey);
             //Console.WriteLine(csp.ImportParameters(privateKey);));

@@ -51,16 +51,16 @@ namespace VehicleInternalSystem
             tcu_ecuPriv = _tcu_ecuPriv;// "    "  "
             bcuPubKey = _bcuPubKey;
             tcuPubKey = _tcuPubKey;
-            Console.WriteLine("------------------BCU constructor");
-            Console.WriteLine("------------------bcu_ecuPriv");
-            Console.WriteLine(ConvertKeyToString(bcu_ecuPriv));
-            Console.WriteLine("------------------tcu_ecuPriv");
-            Console.WriteLine(ConvertKeyToString(tcu_ecuPriv));
-            Console.WriteLine("------------------bcuPubKey");
-            Console.WriteLine(ConvertKeyToString(bcuPubKey));
-            Console.WriteLine("------------------tcuPubKey");
-            Console.WriteLine(ConvertKeyToString(tcuPubKey));
-            Console.WriteLine("------------------END");
+            //Console.WriteLine("------------------BCU constructor");
+            //Console.WriteLine("------------------bcu_ecuPriv");
+            //Console.WriteLine(ConvertKeyToString(bcu_ecuPriv));
+            //Console.WriteLine("------------------tcu_ecuPriv");
+            //Console.WriteLine(ConvertKeyToString(tcu_ecuPriv));
+            //Console.WriteLine("------------------bcuPubKey");
+            //Console.WriteLine(ConvertKeyToString(bcuPubKey));
+            //Console.WriteLine("------------------tcuPubKey");
+            //Console.WriteLine(ConvertKeyToString(tcuPubKey));
+            //Console.WriteLine("------------------END");
         }
 
         public void Run()
@@ -90,33 +90,34 @@ namespace VehicleInternalSystem
             //sends every combination to all requested connection
             //[TODO]
             string ecuID = "ID? ECU";
-            //string sendBCU = EncryptMessage("BCU", ecuID);//test
+            string sendBCU = EncryptMessage("BCU", ecuID);//test
             //Console.WriteLine("sendBCU");
             //Console.WriteLine(sendBCU);
             //Console.WriteLine("__sendBCU");
             //Console.WriteLine(DecryptMessage("TCU", sendBCU));
             string sendTCU = EncryptMessage("TCU", ecuID);
-            //writer.Write(sendBCU); 
+            writer.Write(sendBCU); 
             writer.Write(sendTCU);//end[todo]
-            // writer.Write("ID? ECU");
             string id = reader.ReadString();
-            Console.WriteLine("id");
-            Console.WriteLine(id);
+            //Console.WriteLine("id");
+            //Console.WriteLine(id);
             //[TODO] DecryptMessage(id)
             string BCU = "BCU";
             string TCU = "TCU";
-            //string idBCU = DecryptMessage(BCU, id);
-            Console.WriteLine("idbcu");
+            string idBCU = DecryptMessage(BCU, id);
+            //Console.WriteLine("idbcu");
             //Console.WriteLine(idBCU);
             string idTCU = DecryptMessage(TCU, id);
-            Console.WriteLine("idtcu");
-            Console.WriteLine(idTCU);
+            //Console.WriteLine("idtcu");
+            //Console.WriteLine(idTCU);
             string type = null;
-            //if (BCU.Equals(idBCU)){type = BCU;}
-            if (TCU.Equals(idTCU)) { type = TCU; }
-            Console.WriteLine("type");
-            Console.WriteLine(type);
-            Console.WriteLine("before send");
+            //BCU key decriptes well the message
+            if (idBCU != null) {type = BCU;}
+            //TCU key decriptes well the message
+            if (idTCU != null) {type = TCU;}
+            //Console.WriteLine("type");
+            //Console.WriteLine(type);
+            //Console.WriteLine("before send");
             writer.Write(EncryptMessage(type, "OK?"));
             string bcuString = reader.ReadString();
             string response = DecryptMessage(type, bcuString);
@@ -216,7 +217,7 @@ namespace VehicleInternalSystem
                     bytesCypherText = csp.Encrypt(bytesPlainTextData, false);
                     //we might want a string representation of our cypher text... base64 will do
                     cypherText = Convert.ToBase64String(bytesCypherText);
-                    Console.WriteLine("concerted in bcumode");
+                    //Console.WriteLine("concerted in bcumode");
                     break;
                 case "TCU":
                     csp.ImportParameters(tcuPubKey);
@@ -247,7 +248,9 @@ namespace VehicleInternalSystem
                     //we want to decrypt, therefore we need a csp and load our private key
                     csp.ImportParameters(bcu_ecuPriv);
                     //decrypt and strip pkcs#1.5 padding
-                    bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
+                    try { bytesPlainTextData = csp.Decrypt(bytesCypherText, false); }
+                    //if the decripting is not successefull enters the exception 
+                    catch (Exception) { return null; }
                     //get our original plainText back...
                     plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
                     //decoded text
@@ -261,10 +264,12 @@ namespace VehicleInternalSystem
                     //we want to decrypt, therefore we need a csp and load our private key
                     csp.ImportParameters(tcu_ecuPriv);
                     //decrypt and strip pkcs#1.5 padding
-                    bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
+                    try { bytesPlainTextData = csp.Decrypt(bytesCypherText, false); }
+                    //if the decripting is not successefull enters the exception 
+                    catch (Exception) { return null; }
                     //get our original plainText back...
                     plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
-                    Console.WriteLine("AKA tcu decriptes");
+                    //Console.WriteLine("AKA tcu decriptes");
                     break;
             }
 

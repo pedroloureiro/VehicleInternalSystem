@@ -67,12 +67,15 @@ namespace VehicleInternalSystem
             //Console.WriteLine("+++++++++++++++++++++++++++++++before desencripting bcu+++++++++++++++++++++++++++++++");
             //Console.WriteLine(response);
             response = DecryptMessage(response);
+            string response2 = reader.ReadString();//asks for id//[TODO]decript with bcuPrivateKey 
+            response2 = DecryptMessage(response2);
             //Console.WriteLine("+++++++++++++++++++++++++++++++desencripting bcu+++++++++++++++++++++++++++++++");
             //Console.WriteLine(response);
             //Console.WriteLine("+++++++++++++++++++++++++++++++after desencripting bcu+++++++++++++++++++++++++++++++");
             //Console.WriteLine("RESPONSE");
             //Console.WriteLine(response);
-
+            //if the first message was not sucefull desencripted the second message was
+            if (response == null) { response = response2; }
             if (response.Equals("ID? ECU"))//if it's ecu id 
             {
                 //encrypt the message
@@ -88,14 +91,14 @@ namespace VehicleInternalSystem
             }
 
             string cMessage = reader.ReadString();//[TODO]is this needed?//[TODO]change ecuKey to encMessage
-            Console.WriteLine("//////////PROBLEM++++++++++++");
-            Console.WriteLine("cmessage");
-            Console.WriteLine(cMessage);
-            Console.WriteLine("´response");
-            Console.WriteLine(response);
-            Console.WriteLine("endresponse");
+            //Console.WriteLine("//////////PROBLEM++++++++++++");
+            //Console.WriteLine("cmessage");
+            //Console.WriteLine(cMessage);
+            //Console.WriteLine("´response");
+            //Console.WriteLine(response);
+            //Console.WriteLine("endresponse");
             response = DecryptMessage(cMessage);//[TODO] DecryptMessage(encMessage)
-            Console.WriteLine("********************PROBLEM++++++++++++");
+            //Console.WriteLine("********************PROBLEM++++++++++++");
             if (response.Equals("OK?"))
             {
                 writer.Write(EncryptMessage("OK"));
@@ -159,15 +162,24 @@ namespace VehicleInternalSystem
             byte[] bytesPlainTextData = null;
             byte[] bytesCypherText = null;
             string plainTextData = null;
-            Console.WriteLine("cypherText");
-            Console.WriteLine(cypherText);
-            Console.WriteLine("endcypherText");
+            //Console.WriteLine("cypherText");
+            //Console.WriteLine(cypherText);
+            //Console.WriteLine("endcypherText");
             bytesCypherText = Convert.FromBase64String(cypherText);
-            Console.WriteLine(bytesCypherText);
+            //Console.WriteLine(bytesCypherText);
             //we want to decrypt, therefore we need a csp and load our private key
             csp.ImportParameters(privateKey);
             //decrypt and strip pkcs#1.5 padding
-            bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
+            try
+            {
+                bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
+            }
+            //if the decripting is not successefull enters the exception 
+            catch (Exception)
+            {
+                //Console.WriteLine("null exception");
+                return null;
+            }
             //get our original plainText back...
             plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
 
