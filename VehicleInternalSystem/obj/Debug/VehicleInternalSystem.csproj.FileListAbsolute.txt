@@ -9,3 +9,14 @@ C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\De
 C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.pdb
 C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.BCUForm.resources
 C:\Users\pedro\Documents\SIRS\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.TCUForm.resources
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.exe.config
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.exe
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.pdb
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.exe
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\bin\Debug\VehicleInternalSystem.pdb
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.csprojResolveAssemblyReference.cache
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.BCUForm.resources
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.ECUForm.resources
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.Properties.Resources.resources
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.TCUForm.resources
+C:\Games\VehicleInternalSystem\VehicleInternalSystem\obj\Debug\VehicleInternalSystem.csproj.GenerateResource.Cache

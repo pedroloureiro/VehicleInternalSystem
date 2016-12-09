@@ -24,7 +24,17 @@ namespace VehicleInternalSystem
         private static RSAParameters publicKey;
         private static RSAParameters ecuPubKey;
 
-        public TCU() { }
+        public TCU(RSAParameters _privateKey, RSAParameters _ecuPubKey)
+        {
+            //TODO
+            /*
+    editar campo para receber as chaves "privateKey" e "ecuPubKey" 
+    guardar em modo chave e não em string
+    sendo que actualmente estas estão a ser geradas no GenerateSendKeys 
+             */
+            privateKey = _privateKey;
+            ecuPubKey = _ecuPubKey;
+        }
 
         public void Run()
         {
@@ -54,11 +64,16 @@ namespace VehicleInternalSystem
             }
             reader = new BinaryReader(tcuSocket.GetStream());
             writer = new BinaryWriter(tcuSocket.GetStream());
-            string response = reader.ReadString();
+            string response = reader.ReadString();//asks for id//[TODO]decript with bcuPrivateKey 
+            response = DecryptMessage(response);
+            //Console.WriteLine("RESPONSE");
+            //Console.WriteLine(response);
 
-            if (response.Equals("ID? ECU"))
+            if (response.Equals("ID? ECU"))//if it's bcu id 
             {
-                writer.Write("TCU");
+                //encrypt the message
+                string encmessage = EncryptMessage("TCU");
+                writer.Write(encmessage);//send i'm tcu//[TODO]encript with ecutPublicKey
             }
             else
             {
@@ -68,8 +83,8 @@ namespace VehicleInternalSystem
                 return false;
             }
 
-            string ecuKey = reader.ReadString();
-            response = GenerateSendKeys(ecuKey);
+            string encMessage = reader.ReadString();//is this needed?//[TODO]change ecuKey to encMessage
+            response = DecryptMessage(encMessage);//[TODO] DecryptMessage(encMessage)
 
             if (response.Equals("OK?"))
             {
@@ -86,7 +101,7 @@ namespace VehicleInternalSystem
 
         }
 
-        public string GenerateSendKeys(string ecuKey)
+        public string GenerateSendKeys(string ecuKey)//[TODO] not needed
         {
             var csp = new RSACryptoServiceProvider(2048);
 
@@ -94,14 +109,19 @@ namespace VehicleInternalSystem
             //and the public key ...
             publicKey = csp.ExportParameters(false);
             ecuPubKey = ConvertStringToKey(ecuKey);
-
+            //BEGIN trying to understand how rsakeys work//to erase
+            /*Console.Write("privateKey:");
+            Console.WriteLine(ConvertKeyToString(privateKey));
+            Console.Write("publicKey:");
+            Console.WriteLine(ConvertKeyToString(publicKey));*/
+            //END trying to understand how rsakeys work
             writer.Write(ConvertKeyToString(publicKey));
             string encryptedResponse = reader.ReadString();
 
             return DecryptMessage(encryptedResponse);
         }
 
-        public string EncryptMessage(string message)
+        public string EncryptMessage(string message)//[DONE] ready for ignition keys
         {
             RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
 
@@ -120,14 +140,14 @@ namespace VehicleInternalSystem
             return cypherText;
         }
 
-        public string DecryptMessage(string cypherText)
+        public string DecryptMessage(string cypherText)//[DONE] ready for ignition keys
         {
             RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
 
             byte[] bytesPlainTextData = null;
             byte[] bytesCypherText = null;
             string plainTextData = null;
-
+            
             bytesCypherText = Convert.FromBase64String(cypherText);
             //we want to decrypt, therefore we need a csp and load our private key
             csp.ImportParameters(privateKey);
@@ -135,6 +155,13 @@ namespace VehicleInternalSystem
             bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
             //get our original plainText back...
             plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
+
+            //Console.WriteLine("------BEGIN  TCUprivateKey");//to erase
+            //Console.WriteLine(privateKey);
+            //Console.WriteLine(csp.ImportParameters(privateKey);));
+            //nsole.WriteLine("------END    TCUprivateKey");
+
+
 
             return plainTextData;
         }
@@ -162,10 +189,10 @@ namespace VehicleInternalSystem
             return pubKey;
         }
 
-        //public string Listen()
-        //{
-        //    return reader.ReadString();
-        //}
+        public string Listen()
+        {
+            return reader.ReadString();
+        }
 
         public void TireStatus(string status)
         {

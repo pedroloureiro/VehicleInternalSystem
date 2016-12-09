@@ -26,7 +26,7 @@ namespace VehicleInternalSystem
         //public key to send to bcu
         private static RSAParameters bcu_ecuPub;
         //public key to decrypt messages from bcu
-        private static RSAParameters bcuPub;
+        private static RSAParameters bcuPubKey;
 
 
         private TcpClient tcuSocket;
@@ -37,9 +37,31 @@ namespace VehicleInternalSystem
         //public key to send to tcu
         private static RSAParameters tcu_ecuPub;
         //public key to decrypt messages from tcu
-        private static RSAParameters tcuPub;
+        private static RSAParameters tcuPubKey;
 
-        public ECU() { }
+        public ECU(RSAParameters _bcu_ecuPriv, RSAParameters _tcu_ecuPriv, RSAParameters _bcuPubKey, RSAParameters _tcuPubKey)
+        {
+            //TODO
+            /*
+    editar campo para receber as chaves "privateKey" , "bcuPubKey"e "tcuPubKey" 
+    guardar em modo chave e não em string
+    sendo que actualmente estas estão a ser geradas no GenerateSendKeys
+             */
+            bcu_ecuPriv = _bcu_ecuPriv;//WHAT IS THIS??
+            tcu_ecuPriv = _tcu_ecuPriv;// "    "  "
+            bcuPubKey = _bcuPubKey;
+            tcuPubKey = _tcuPubKey;
+            Console.WriteLine("------------------BCU constructor");
+            Console.WriteLine("------------------bcu_ecuPriv");
+            Console.WriteLine(ConvertKeyToString(bcu_ecuPriv));
+            Console.WriteLine("------------------tcu_ecuPriv");
+            Console.WriteLine(ConvertKeyToString(tcu_ecuPriv));
+            Console.WriteLine("------------------bcuPubKey");
+            Console.WriteLine(ConvertKeyToString(bcuPubKey));
+            Console.WriteLine("------------------tcuPubKey");
+            Console.WriteLine(ConvertKeyToString(tcuPubKey));
+            Console.WriteLine("------------------END");
+        }
 
         public void Run()
         {
@@ -50,9 +72,10 @@ namespace VehicleInternalSystem
 
         public string InitECU()
         {
+
             ipAddress = IPAddress.Parse("127.0.0.1");
             ecuSocket = new TcpListener(ipAddress, 500);
-            ecuSocket.Start();
+            ecuSocket.Start();//exection not handle TO DO
 
             return ipAddress.ToString();
         }
@@ -64,36 +87,70 @@ namespace VehicleInternalSystem
             BinaryWriter writer = new BinaryWriter(tempSocket.GetStream());
             BinaryReader reader = new BinaryReader(tempSocket.GetStream());
 
-            writer.Write("ID? ECU");
+            //sends every combination to all requested connection
+            //[TODO]
+            string ecuID = "ID? ECU";
+            string sendBCU = EncryptMessage("BCU", ecuID);
+            Console.WriteLine("sendBCU");
+            Console.WriteLine(sendBCU);
+            Console.WriteLine("__sendBCU");
+            //Console.WriteLine(DecryptMessage("TCU", sendBCU));
+            string sendTCU = EncryptMessage("TCU", ecuID);
+            writer.Write(sendBCU); 
+            //writer.Write(sendTCU);//end[todo]
+            // writer.Write("ID? ECU");
             string id = reader.ReadString();
-            switch (id)
+            Console.WriteLine("id");
+            Console.WriteLine(id);
+            //[TODO] DecryptMessage(id)
+            string BCU = "BCU";
+            string TCU = "TCU";
+            string idBCU = DecryptMessage(BCU, id);
+            Console.WriteLine("idbcu");
+            Console.WriteLine(idBCU);
+            //string idTCU = DecryptMessage(TCU, id);
+            Console.WriteLine("idtcu");
+            //Console.WriteLine(idTCU);
+            string type = null;
+            if (BCU.Equals(idBCU)){type = BCU;}
+            //if (TCU.Equals(idTCU)){type = TCU;}
+            Console.WriteLine("type");
+            Console.WriteLine(type);
+            Console.WriteLine("before send");
+            writer.Write(EncryptMessage(type, "OK?"));
+            string bcuString = reader.ReadString();
+            string response = DecryptMessage(type, bcuString);
+            if (!response.Equals("OK"))
+            {return (type + " tried to connect, but was denied\n");}//end[todo]
+            switch (type)//changed id to type
             {
-                case "BCU":
-                    
-                    if(KeyDistribution(reader, writer, id))
-                    {
-                        bcuSocket = tempSocket;
-                        bcuReader = reader;
-                        bcuWriter = writer;
-                        return "CONNECTED TO BCU\n";
-                    }
-                    else return (id + " tried to connect, but was denied\n");
+                case "BCU"://remove
+
+                    //if (KeyDistribution(reader, writer, id))//[TODO] not needed
+
+                    //{
+                    bcuSocket = tempSocket;
+                    bcuReader = reader;
+                    bcuWriter = writer;
+                    return "CONNECTED TO BCU\n";
+                //}
+                //else return (type + " tried to connect, but was denied\n");
 
                 case "TCU":
-                    if (KeyDistribution(reader, writer, id))
-                    {
-                        tcuSocket = tempSocket;
-                        tcuReader = reader;
-                        tcuWriter = writer;
-                        return "CONNECTED TO TCU";
-                    }
-                    else return (id + " tried to connect, but was denied\n");
+                    //if (KeyDistribution(reader, writer, id))//[TODO] not needed
+                    //{
+                    tcuSocket = tempSocket;
+                    tcuReader = reader;
+                    tcuWriter = writer;
+                    return "CONNECTED TO TCU";
+                    //}
+                    //else return (id + " tried to connect, but was denied\n");
             }
 
-            return (id + " tried to connect, but was denied\n");
+            return (id + " tried to connect, but was denied\n");//[TODO]EDIT id to idBCU, idTCU or other
         }
 
-        public bool KeyDistribution(BinaryReader reader, BinaryWriter writer, string type)
+        public bool KeyDistribution(BinaryReader reader, BinaryWriter writer, string type)//[TODO] not needed
         {
             var csp = new RSACryptoServiceProvider(2048);
             string response = null;
@@ -103,12 +160,19 @@ namespace VehicleInternalSystem
                 case "BCU":
                     //how to get the private key
                     bcu_ecuPriv = csp.ExportParameters(true);
+                    // Console.WriteLine("---BEGIN  bcu_ecuPriv");//to erase
+                    //Console.WriteLine(ConvertKeyToString(bcu_ecuPriv));
+                    //Console.WriteLine("---END    bcu_ecuPriv");
                     //and the public key ...
                     bcu_ecuPub = csp.ExportParameters(false);
+                    //Console.WriteLine("<<<BEGIN  bcu_ecuPub");//to erase
+                    //Console.WriteLine(bcu_ecuPub);
+                    //Console.WriteLine(ConvertKeyToString(bcu_ecuPub));
+                    //Console.WriteLine(">>>END    bcu_ecuPub");
                     writer.Write(ConvertKeyToString(bcu_ecuPub));
 
                     string bcuString = reader.ReadString();
-                    bcuPub = ConvertStringToKey(bcuString);
+                    bcuPubKey = ConvertStringToKey(bcuString);
 
                     writer.Write(EncryptMessage(type, "OK?"));
                     bcuString = reader.ReadString();
@@ -123,7 +187,7 @@ namespace VehicleInternalSystem
                     writer.Write(ConvertKeyToString(tcu_ecuPub));
 
                     string tcuString= reader.ReadString();
-                    tcuPub = ConvertStringToKey(tcuString);
+                    tcuPubKey = ConvertStringToKey(tcuString);
 
                     writer.Write(EncryptMessage(type, "OK?"));
                     tcuString = reader.ReadString();
@@ -145,16 +209,17 @@ namespace VehicleInternalSystem
             switch (type)
             {
                 case "BCU":
-                    csp.ImportParameters(bcuPub);
+                    csp.ImportParameters(bcuPubKey);
                     //for encryption, always handle bytes...
                     bytesPlainTextData = System.Text.Encoding.Unicode.GetBytes(message);
                     //apply pkcs#1.5 padding and encrypt our data 
                     bytesCypherText = csp.Encrypt(bytesPlainTextData, false);
                     //we might want a string representation of our cypher text... base64 will do
                     cypherText = Convert.ToBase64String(bytesCypherText);
+                    Console.WriteLine("concerted in bcumode");
                     break;
                 case "TCU":
-                    csp.ImportParameters(tcuPub);
+                    csp.ImportParameters(tcuPubKey);
                     //for encryption, always handle bytes...
                     bytesPlainTextData = System.Text.Encoding.Unicode.GetBytes(message);
                     //apply pkcs#1.5 padding and encrypt our data 
@@ -185,6 +250,11 @@ namespace VehicleInternalSystem
                     bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
                     //get our original plainText back...
                     plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
+                    //decoded text
+                    //delete the 3 printlines downhere
+                    //Console.WriteLine("<<<BEGINplainTextData");
+                    //Console.WriteLine(plainTextData);
+                    //Console.WriteLine(">>>ENDplainTextData");
                     break;
                 case "TCU":
                     bytesCypherText = Convert.FromBase64String(cypherText);
@@ -194,6 +264,7 @@ namespace VehicleInternalSystem
                     bytesPlainTextData = csp.Decrypt(bytesCypherText, false);
                     //get our original plainText back...
                     plainTextData = System.Text.Encoding.Unicode.GetString(bytesPlainTextData);
+                    Console.WriteLine("AKA tcu decriptes");
                     break;
             }
 
@@ -226,7 +297,9 @@ namespace VehicleInternalSystem
         public string ListenTCU()
         {
             string response = tcuReader.ReadString();
-
+            //delete these 2 printlines
+            //Console.WriteLine("LISTENresponse");
+            //Console.WriteLine(response);
             return DecryptMessage("TCU", response);
         }
 

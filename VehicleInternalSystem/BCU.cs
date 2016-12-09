@@ -23,8 +23,18 @@ namespace VehicleInternalSystem
         private static RSAParameters privateKey;
         private static RSAParameters publicKey;
         private static RSAParameters ecuPubKey;
+        
+        public BCU(RSAParameters _privateKey, RSAParameters _ecuPubKey)
+        {     //TODO
+              /*
+      editar campo para receber as chaves "privateKey" e "ecuPubKey" 
+      guardar em modo chave e não em string
+      sendo que actualmente estas estão a ser geradas no GenerateSendKeys 
+               */
+            privateKey = _privateKey;
+            ecuPubKey = _ecuPubKey;
 
-        public BCU() { }
+        }
 
         public void Run()
         {
@@ -53,11 +63,21 @@ namespace VehicleInternalSystem
             }
             reader = new BinaryReader(bcuSocket.GetStream());
             writer = new BinaryWriter(bcuSocket.GetStream());
-            string response  = reader.ReadString();
+            string response  = reader.ReadString(); //asks for id//[TODO]decript with bcuPrivateKey 
+            //Console.WriteLine("+++++++++++++++++++++++++++++++before desencripting bcu+++++++++++++++++++++++++++++++");
+            //Console.WriteLine(response);
+            response = DecryptMessage(response);
+            //Console.WriteLine("+++++++++++++++++++++++++++++++desencripting bcu+++++++++++++++++++++++++++++++");
+            //Console.WriteLine(response);
+            //Console.WriteLine("+++++++++++++++++++++++++++++++after desencripting bcu+++++++++++++++++++++++++++++++");
+            //Console.WriteLine("RESPONSE");
+            //Console.WriteLine(response);
 
-            if(response.Equals("ID? ECU"))
+            if (response.Equals("ID? ECU"))//if it's ecu id 
             {
-                writer.Write("BCU");
+                //encrypt the message
+                string encmessage = EncryptMessage("BCU");
+                writer.Write(encmessage);//send i'm bcu//[TODO]encript with ecubPublicKey
             }
             else
             {
@@ -67,9 +87,15 @@ namespace VehicleInternalSystem
                 return false;
             }
 
-            string ecuKey = reader.ReadString();
-            response = GenerateSendKeys(ecuKey);
-
+            string cMessage = reader.ReadString();//[TODO]is this needed?//[TODO]change ecuKey to encMessage
+            Console.WriteLine("//////////PROBLEM++++++++++++");
+            Console.WriteLine("cmessage");
+            Console.WriteLine(cMessage);
+            Console.WriteLine("´response");
+            Console.WriteLine(response);
+            Console.WriteLine("endresponse");
+            response = DecryptMessage(cMessage);//[TODO] DecryptMessage(encMessage)
+            Console.WriteLine("********************PROBLEM++++++++++++");
             if (response.Equals("OK?"))
             {
                 writer.Write(EncryptMessage("OK"));
@@ -85,7 +111,7 @@ namespace VehicleInternalSystem
 
         }
 
-        public string GenerateSendKeys(string ecuKey)
+        public string GenerateSendKeys(string ecuKey)//[TODO] not needed
         {
             var csp = new RSACryptoServiceProvider(2048);
 
@@ -94,13 +120,20 @@ namespace VehicleInternalSystem
             publicKey = csp.ExportParameters(false);
             ecuPubKey = ConvertStringToKey(ecuKey);
 
+            /*Console.WriteLine("<<<BEGIN  bcu privateKey");//to erase
+            Console.WriteLine(ConvertKeyToString(privateKey));
+            Console.WriteLine("Pause");
+            Console.WriteLine(ConvertKeyToString(publicKey));
+            Console.WriteLine(">>>END    bcu_ecuPub");
+            */
+
             writer.Write(ConvertKeyToString(publicKey));
             string encryptedResponse = reader.ReadString();
 
             return DecryptMessage(encryptedResponse);         
         }
 
-        public string EncryptMessage(string message)
+        public string EncryptMessage(string message)//[DONE] ready for ignition keys
         {
             RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
 
@@ -119,15 +152,18 @@ namespace VehicleInternalSystem
             return cypherText;
         }
 
-        public string DecryptMessage(string cypherText)
+        public string DecryptMessage(string cypherText)//[DONE] ready for ignition keys
         {
             RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
 
             byte[] bytesPlainTextData = null;
             byte[] bytesCypherText = null;
             string plainTextData = null;
-
+            Console.WriteLine("cypherText");
+            Console.WriteLine(cypherText);
+            Console.WriteLine("endcypherText");
             bytesCypherText = Convert.FromBase64String(cypherText);
+            Console.WriteLine(bytesCypherText);
             //we want to decrypt, therefore we need a csp and load our private key
             csp.ImportParameters(privateKey);
             //decrypt and strip pkcs#1.5 padding
