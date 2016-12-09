@@ -58,38 +58,27 @@ namespace VehicleInternalSystem
                 return false;
             }
 
-            //is this necessary?
             while(bcuSocket.Connected == false)
             {
                 //do nothing
             }
             reader = new BinaryReader(bcuSocket.GetStream());
             writer = new BinaryWriter(bcuSocket.GetStream());
-            string response  = reader.ReadString(); //asks for id//[TODO]decript with bcuPrivateKey 
-            //Console.WriteLine("+++++++++++++++++++++++++++++++before desencripting bcu+++++++++++++++++++++++++++++++");
-            //Console.WriteLine(response);
+            string response  = reader.ReadString(); //asks for id
+
             response = removeTimestamp(DecryptMessage(response));
-            string response2 = reader.ReadString();//asks for id//[TODO]decript with bcuPrivateKey 
+            string response2 = reader.ReadString();//asks for id 
             response2 = removeTimestamp(DecryptMessage(response2));
-            //Console.WriteLine("+++++++++++++++++++++++++++++++desencripting bcu+++++++++++++++++++++++++++++++");
-            //Console.WriteLine(response);
-            //Console.WriteLine("+++++++++++++++++++++++++++++++after desencripting bcu+++++++++++++++++++++++++++++++");
-            Console.WriteLine("RESPONSE");
-            Console.WriteLine(response);
-            Console.WriteLine("RESPONSE2");
-            Console.WriteLine(response2);
-            Console.WriteLine("eeennndddRESPONSE2");
+
             //if the first message was not sucefull desencripted the second message was
             if (response == null) { response = response2; }
             if (response.Equals("ID? ECU"))//if it's ecu id 
             {
                 //encrypt the message
                 string encmessage = EncryptMessage(addTimestamp("BCU"));
-                Console.WriteLine("+++++++++++++++++++++++++++++++after desencripting bcu+++++++++++++++++++++++++++++++");
-                Console.WriteLine(encmessage);
-                Console.WriteLine("before send encmessage");
-                writer.Write(encmessage);//send i'm bcu//[TODO]encript with ecubPublicKey
-                Console.WriteLine("after send encmessage");
+
+                writer.Write(encmessage);//send i'm bcu
+               
             }
             else
             {
@@ -98,19 +87,14 @@ namespace VehicleInternalSystem
                 bcuSocket.Close();
                 return false;
             }
-            Console.WriteLine("cMessage = reader.ReadString();");
-            string cMessage = reader.ReadString();//[TODO]is this needed?//[TODO]change ecuKey to encMessage
-            //Console.WriteLine("//////////PROBLEM++++++++++++");
-            //Console.WriteLine("cmessage");
-            //Console.WriteLine(cMessage);
-            //Console.WriteLine("´response");
-            //Console.WriteLine(response);
-            //Console.WriteLine("endresponse");
+            
+            string cMessage = reader.ReadString();
+          
             response = DecryptMessage(cMessage);
-            response = removeTimestamp(response);//[TODO] DecryptMessage(encMessage)
-            //Console.WriteLine("********************PROBLEM++++++++++++");
+            response = removeTimestamp(response);
+            
             if (response.Equals("OK?"))
-            {Console.WriteLine("EncryptMessage(addTimestamp(OK)");
+            {
                 writer.Write(EncryptMessage(addTimestamp("OK")));
                 return true;
             }
@@ -127,8 +111,6 @@ namespace VehicleInternalSystem
         //returns a timestamp
         public static String GetTimestamp(DateTime value)
         {
-            Console.WriteLine("get time stamp");
-            Console.WriteLine(value.ToString("yyyyMMddHHmmssffff"));
             return value.ToString("yyyyMMddHHmmssffff");
         }
 
@@ -138,10 +120,7 @@ namespace VehicleInternalSystem
             //add timestamp
             //return a
             //DateTime date1 = new DateTime(DateTime.Now);
-            Console.WriteLine("add time stamp");
-            Console.WriteLine(message);
             message = GetTimestamp(DateTime.Now) + "-" + message;
-            Console.WriteLine(message);
             return message;
         }
 
@@ -154,41 +133,15 @@ namespace VehicleInternalSystem
             { return null; }
 
             string[] messageparts = decriptedmessage.Split('-');
-            Console.WriteLine("messageparts.Length");
-            Console.WriteLine(messageparts[0]);
-            Console.WriteLine(messageparts[1]);
             long actualTime = long.Parse(GetTimestamp(DateTime.Now));
             long messageTime = long.Parse(messageparts[0]);
             long differenceTime = actualTime - messageTime;
-            Console.WriteLine(differenceTime);
-            Console.WriteLine("in bcu time");
             if (differenceTime < EcuValidTime)
             { return messageparts[1]; }
 
             return null;
         }
 
-        public string GenerateSendKeys(string ecuKey)//[TODO] not needed
-        {
-            var csp = new RSACryptoServiceProvider(2048);
-
-            privateKey = csp.ExportParameters(true);
-            //and the public key ...
-            publicKey = csp.ExportParameters(false);
-            ecuPubKey = ConvertStringToKey(ecuKey);
-
-            /*Console.WriteLine("<<<BEGIN  bcu privateKey");//to erase
-            Console.WriteLine(ConvertKeyToString(privateKey));
-            Console.WriteLine("Pause");
-            Console.WriteLine(ConvertKeyToString(publicKey));
-            Console.WriteLine(">>>END    bcu_ecuPub");
-            */
-
-            writer.Write(ConvertKeyToString(publicKey));
-            string encryptedResponse = reader.ReadString();
-
-            return DecryptMessage(encryptedResponse);         
-        }
 
         public string EncryptMessage(string message)//[DONE] ready for ignition keys
         {

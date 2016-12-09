@@ -41,7 +41,6 @@ namespace VehicleInternalSystem
             var thread0 = new Thread(GenerateKeys);
             thread0.Start();
             thread0.Join();
-            //Thread.Sleep(5000); //so thread0 executes and ends before others start 1 2 3  
             var thread1 = new Thread(ThreadECU);
             var thread2 = new Thread(ThreadBCU);
             var thread3 = new Thread(ThreadTCU);
@@ -58,22 +57,18 @@ namespace VehicleInternalSystem
 
         private static void ThreadECU()
         {
-            //ECU ecu = new ECU();
             ECU ecu = new ECU(ecubPriv,ecutPriv, bcuPub, tcuPub);
-            //ECU ecu = new ECU(ecubPriv, bcuPriv, bcuPub, tcuPub);//edited for tests
             ecu.Run();       
         }
 
         private static void ThreadBCU()
         {
-            //BCU bcu = new BCU();
             BCU bcu = new BCU(bcuPriv, ecubPub);
             bcu.Run();
         }
 
         private static void ThreadTCU()
         {
-            //TCU tcu = new TCU();
             TCU tcu = new TCU(tcuPriv, ecutPub);
             tcu.Run();
         }
@@ -119,21 +114,6 @@ namespace VehicleInternalSystem
             ecubPub = cspECUB.ExportParameters(false);
             ecutPub = cspECUT.ExportParameters(false);
 
-            /*
-            Console.WriteLine("<<<BEGIN  bcuPriv");
-            Console.WriteLine(ConvertKeyToString(bcuPriv));
-            Console.WriteLine("<<<BEGIN  tcuPriv");
-            Console.WriteLine(ConvertKeyToString(tcuPriv));
-            Console.WriteLine("<<<BEGIN  ecuPriv");
-            Console.WriteLine(ConvertKeyToString(ecuPriv));
-            Console.WriteLine("<<<BEGIN  bcuPub");
-            Console.WriteLine(ConvertKeyToString(bcuPub));
-            Console.WriteLine("<<<BEGIN  tcuPub");
-            Console.WriteLine(ConvertKeyToString(tcuPub));
-            Console.WriteLine("<<<BEGIN  ecuPub");
-            Console.WriteLine(ConvertKeyToString(ecuPub));
-            Console.WriteLine("<<<BEGIN  ENNDDD");
-            */
 
         }
 
