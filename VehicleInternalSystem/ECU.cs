@@ -16,7 +16,7 @@ namespace VehicleInternalSystem
     public class ECU
     {
 
-        private TcpListener ecuSocket;
+        private TcpListener ecuSocket = null;
         private static IPAddress ipAddress;
 
         private TcpClient bcuSocket;
@@ -64,14 +64,17 @@ namespace VehicleInternalSystem
 
         public string InitECU()
         {
+            if (ecuSocket == null)
+            {
+                ipAddress = IPAddress.Parse("127.0.0.1");
+                ecuSocket = new TcpListener(ipAddress, 500);
+                ecuSocket.Start();//exection not handle TO DO
 
-            ipAddress = IPAddress.Parse("127.0.0.1");
-            ecuSocket = new TcpListener(ipAddress, 500);
-            ecuSocket.Start();//exection not handle TO DO
-
-            return ipAddress.ToString();
+                return ipAddress.ToString();
+            }
+            else return null;
         }
-
+        
         public string HandleConnection()
         {
 
