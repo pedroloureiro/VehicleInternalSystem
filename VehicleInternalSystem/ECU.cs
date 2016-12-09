@@ -90,14 +90,14 @@ namespace VehicleInternalSystem
             //sends every combination to all requested connection
             //[TODO]
             string ecuID = "ID? ECU";
-            string sendBCU = EncryptMessage("BCU", ecuID);
-            Console.WriteLine("sendBCU");
-            Console.WriteLine(sendBCU);
-            Console.WriteLine("__sendBCU");
+            //string sendBCU = EncryptMessage("BCU", ecuID);//test
+            //Console.WriteLine("sendBCU");
+            //Console.WriteLine(sendBCU);
+            //Console.WriteLine("__sendBCU");
             //Console.WriteLine(DecryptMessage("TCU", sendBCU));
             string sendTCU = EncryptMessage("TCU", ecuID);
-            writer.Write(sendBCU); 
-            //writer.Write(sendTCU);//end[todo]
+            //writer.Write(sendBCU); 
+            writer.Write(sendTCU);//end[todo]
             // writer.Write("ID? ECU");
             string id = reader.ReadString();
             Console.WriteLine("id");
@@ -105,15 +105,15 @@ namespace VehicleInternalSystem
             //[TODO] DecryptMessage(id)
             string BCU = "BCU";
             string TCU = "TCU";
-            string idBCU = DecryptMessage(BCU, id);
+            //string idBCU = DecryptMessage(BCU, id);
             Console.WriteLine("idbcu");
-            Console.WriteLine(idBCU);
-            //string idTCU = DecryptMessage(TCU, id);
+            //Console.WriteLine(idBCU);
+            string idTCU = DecryptMessage(TCU, id);
             Console.WriteLine("idtcu");
-            //Console.WriteLine(idTCU);
+            Console.WriteLine(idTCU);
             string type = null;
-            if (BCU.Equals(idBCU)){type = BCU;}
-            //if (TCU.Equals(idTCU)){type = TCU;}
+            //if (BCU.Equals(idBCU)){type = BCU;}
+            if (TCU.Equals(idTCU)) { type = TCU; }
             Console.WriteLine("type");
             Console.WriteLine(type);
             Console.WriteLine("before send");

@@ -58,8 +58,8 @@ namespace VehicleInternalSystem
         private static void ThreadECU()
         {
             //ECU ecu = new ECU();
-            //ECU ecu = new ECU(ecubPriv,ecutPriv, bcuPub, tcuPub);
-            ECU ecu = new ECU(ecubPriv, bcuPriv, bcuPub, tcuPub);//edited for tests
+            ECU ecu = new ECU(ecubPriv,ecutPriv, bcuPub, tcuPub);
+            //ECU ecu = new ECU(ecubPriv, bcuPriv, bcuPub, tcuPub);//edited for tests
             ecu.Run();       
         }
 
