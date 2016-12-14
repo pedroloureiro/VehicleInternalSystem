@@ -27,6 +27,15 @@ namespace VehicleInternalSystem
         //timestamps for validation if ECU message freshness 1s
         private static int EcuValidTime = 10000;
 
+        //TESTING PURPOSES
+        private string _lastmessage;
+        public string LastMessage { get { return _lastmessage; } set { _lastmessage = value; } }
+
+        public void Replay()
+        {
+            writer.Write(LastMessage);
+        }
+
         public TCU(RSAParameters _privateKey, RSAParameters _ecuPubKey)
         {
             privateKey = _privateKey;
@@ -156,6 +165,9 @@ namespace VehicleInternalSystem
             bytesCypherText = csp.Encrypt(bytesPlainTextData, false);
             //we might want a string representation of our cypher text... base64 will do
             cypherText = Convert.ToBase64String(bytesCypherText);
+
+            //TEST
+            LastMessage = cypherText;
 
             return cypherText;
         }

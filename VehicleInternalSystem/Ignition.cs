@@ -33,6 +33,11 @@ namespace VehicleInternalSystem
         //public key 
         private static RSAParameters ecutPub;
 
+        //FOR TESTING PURPOSES
+        private static ECU ecu;
+        private static TCU tcu;
+        private static BCU bcu;
+
 
 
         [STAThread]
@@ -44,6 +49,8 @@ namespace VehicleInternalSystem
             var thread1 = new Thread(ThreadECU);
             var thread2 = new Thread(ThreadBCU);
             var thread3 = new Thread(ThreadTCU);
+            var thread4 = new Thread(ThreadATT);
+
 
             thread1.TrySetApartmentState(ApartmentState.STA);
             thread1.Start();
@@ -53,24 +60,35 @@ namespace VehicleInternalSystem
 
             thread3.TrySetApartmentState(ApartmentState.STA);
             thread3.Start();
+
+            Thread.Sleep(1000);
+
+            thread4.TrySetApartmentState(ApartmentState.STA);
+            thread4.Start();
         }
 
         private static void ThreadECU()
         {
-            ECU ecu = new ECU(ecubPriv,ecutPriv, bcuPub, tcuPub);
+            ecu = new ECU(ecubPriv,ecutPriv, bcuPub, tcuPub);
             ecu.Run();       
         }
 
         private static void ThreadBCU()
         {
-            BCU bcu = new BCU(bcuPriv, ecubPub);
+            bcu = new BCU(bcuPriv, ecubPub);
             bcu.Run();
         }
 
         private static void ThreadTCU()
         {
-            TCU tcu = new TCU(tcuPriv, ecutPub);
+            tcu = new TCU(tcuPriv, ecutPub);
             tcu.Run();
+        }
+
+        private static void ThreadATT()
+        {
+            Attacker att = new Attacker(ecu, tcu, bcu);
+            att.Run();
         }
 
 

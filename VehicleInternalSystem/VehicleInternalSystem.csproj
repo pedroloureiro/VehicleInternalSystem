@@ -46,6 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attacker.cs" />
+    <Compile Include="AttackerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AttackerForm.Designer.cs">
+      <DependentUpon>AttackerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="BCU.cs" />
     <Compile Include="BCUForm.cs">
       <SubType>Form</SubType>
@@ -69,6 +76,9 @@
     <Compile Include="TCUForm.Designer.cs">
       <DependentUpon>TCUForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AttackerForm.resx">
+      <DependentUpon>AttackerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="BCUForm.resx">
       <DependentUpon>BCUForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -45,14 +45,21 @@ namespace VehicleInternalSystem
         //timestamps for validation if TCUmessage freshness 6s
         private static int TcuValidTime = 60000;
 
-        public ECU(RSAParameters _bcu_ecuPriv, RSAParameters _tcu_ecuPriv, RSAParameters _bcuPubKey, RSAParameters _tcuPubKey)
+        //TESTING PURPOSES
+        private string _lastmessage;
+        public string LastMessage { get { return _lastmessage; } set { _lastmessage = value; } }
+
+        public void Replay()
         {
-           
+            bcuWriter.Write(LastMessage);
+        }
+
+        public ECU(RSAParameters _bcu_ecuPriv, RSAParameters _tcu_ecuPriv, RSAParameters _bcuPubKey, RSAParameters _tcuPubKey)
+        {  
             bcu_ecuPriv = _bcu_ecuPriv;
             tcu_ecuPriv = _tcu_ecuPriv;
             bcuPubKey = _bcuPubKey;
-            tcuPubKey = _tcuPubKey;
-           
+            tcuPubKey = _tcuPubKey;           
         }
 
         public void Run()
@@ -86,7 +93,7 @@ namespace VehicleInternalSystem
             string ecuID = "ID? ECU";
             string ecuIDtime = addTimestamp(ecuID);
            
-            string sendBCU = EncryptMessage("BCU", ecuIDtime);//test
+            string sendBCU = EncryptMessage("BCU", ecuIDtime);
             string sendTCU = EncryptMessage("TCU", ecuIDtime);
  
             writer.Write(sendBCU); 
@@ -209,7 +216,8 @@ namespace VehicleInternalSystem
                     cypherText = Convert.ToBase64String(bytesCypherText);
                     break;
             }
-
+            //TEST
+            LastMessage = cypherText;
             return cypherText;
         }
 

@@ -11,50 +11,20 @@ using System.Windows.Forms;
 
 namespace VehicleInternalSystem
 {
-    public partial class BCUForm : Form
+    public partial class AttackerForm : Form
     {
-        private BCU bcu;
+        private Attacker att;
+        private string bcuLastMsg;
 
         delegate void SetTextCallback(string text);
 
-        public BCUForm(BCU bcu)
+        public AttackerForm(Attacker att)
         {
-            this.bcu = bcu;
+            this.att = att;
             InitializeComponent();
         }
 
-        private void connectBtn_Click(object sender, EventArgs e)
-        {
-            AddToLog("Trying to connect to ECU");
-            if(bcu.Connect())
-            {
-                AddToLog("CONNECTED");
-
-                Thread listenThread = new Thread(() => Listen());
-                listenThread.Start();
-            } else
-            {
-                AddToLog("Connection Failed");
-            }
-            
-        }
-
-        private void Listen()
-        {
-            string cmd;
-
-            while(true)
-            {
-                cmd = bcu.Listen();
-                //ADDED FOR TESTING
-                if (cmd != null)
-                {
-                    AddToLog("[ECU]" + cmd);
-                    bcu.Ack();
-                    AddToLog("Car Stopped");
-                }
-            }
-        }
+        //BUTTON TO READ LAST MESSAGE
 
         private void AddToLog(string text)
         {
@@ -71,5 +41,31 @@ namespace VehicleInternalSystem
                 this.TextView.AppendText(text + "\n");
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            AddToLog("[ECU] " + att.ShowLastMsgECU());
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            AddToLog("[BCU] " + att.ShowLastMsgBCU());
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            AddToLog("[TCU] " + att.ShowLastMsgTCU());
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            att.ReplayECU();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            att.ReplayBCU();
+        }
+
     }
 }
